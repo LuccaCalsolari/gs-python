@@ -134,7 +134,7 @@ opcaoPrioridade = verificaOpcao(opcaoPrioridade, "O paciente é prioritário?")
 
 if opcaoPrioridade is not None:
     prioritario = input(f"Qual das categorias:{listaPrioritario}")
-    prioritario = verificaLista(prioritario, listaPrioritario, f"Qual das categorias:{listaPrioritario}",
+    prioritario = verificaLista(prioritario, listaPrioritario, f"Qual das categorias{listaPrioritario}:",
                                 f'A opção deve ser uma destas :{listaPrioritario}')
     listaAppend(prioritario, "Atendimento priotitário:")
 
@@ -163,4 +163,4 @@ for i in range(len(fichaPaciente)):
     print(fichaPaciente[i])
 
 
-print(f"Muito Obrigado por utilizar os serviços do {Cor.ROSA}Healt{Cor.RESET}{Cor.AZUL}Connect{Cor.RESET}")
+print(f"Muito Obrigado por utilizar os serviços da {Cor.ROSA}Healt{Cor.RESET}{Cor.AZUL}Connect{Cor.RESET}")
