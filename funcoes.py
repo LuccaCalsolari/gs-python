@@ -135,8 +135,7 @@ def verifica_num(var, msg, alerta):
 def escolher_opcao(var, lista_opcoes, msg, alerta):
     while var.lower() not in lista_opcoes:
         print(alerta)
-        erro = input(msg).strip().lower()
-        var = erro[0]
+        var = input(msg).strip().lower()
     return var
 
 def lista_append(var):
