@@ -56,7 +56,7 @@ def main():
 
     # pergunta se o paciente tem alergia
     opcao_alergia = input("O paciente tem alguma alergia?").strip().lower()
-    opcao_alergia = escolher_opcao(opcao_alergia, ["s", "n"], "O paciente tem alguma alergia?",
+    opcao_alergia = escolher_opcao(opcao_alergia[0], ["s", "n"], "O paciente tem alguma alergia?",
                                    "Digite uma resposta válida!")
     if opcao_alergia == "s":
         alergia = input("Qual?")
@@ -66,7 +66,7 @@ def main():
 
     # pergunta se tem problema crônico
     opcao_saude_cronico = input("O paciente tem algum problema de saúde crônico?").strip().lower()
-    opcao_saude_cronico = escolher_opcao(opcao_saude_cronico, ["s", "n"],"O paciente tem algum problema de saúde crônico?","Digite uma resposta válida!")
+    opcao_saude_cronico = escolher_opcao(opcao_saude_cronico[0], ["s", "n"],"O paciente tem algum problema de saúde crônico?","Digite uma resposta válida!")
 
     if opcao_saude_cronico == "s":
         saude_cronico = input("Qual?")
@@ -77,7 +77,7 @@ def main():
     # pergunta se é prioritário
     lista_prioritario = ["pcd", "idoso", "gestante"]
     opcao_prioridade = input("O paciente é prioritário?").strip().lower()
-    opcao_prioridade = escolher_opcao(opcao_prioridade, ["s", "n"],
+    opcao_prioridade = escolher_opcao(opcao_prioridade[0], ["s", "n"],
                                       "O paciente é prioritário?", "Digite uma resposta válida!")
     if opcao_prioridade == "s":
         prioritario = escolher_opcao(input(f"Qual das categorias ({', '.join(lista_prioritario)}): "),
