@@ -1,166 +1,115 @@
-
-print("Agendamento de exame e ficha do paciente "
-      "\ninsira os dados do pacientes:")
-
 from datetime import datetime
-
 import re
+import sqlite3
+from funcoes import *
 
 
-class Cor:
-    RESET = '\033[0m'
-    CINZA = '\033[37m'
-    VERDE = '\033[36m'
-    ROSA = '\033[95m'  # Rosa
-    AZUL = '\033[94m'
+def main():
+    imprimir_linha_bonita("agendamento de exame e ficha do paciente")
 
+    global ficha_paciente
+    ficha_paciente = []
 
-#função para verificar se o telefone do usuário está no formato válido
-def verificaTelefone(var):
-    padrao = re.compile(r'^\(\d{2}\) \d{5}-\d{4}$')
-    if padrao.match(var):
-        return True
-    else:
-        return False
+    # pega o nome do paciente
+    nome = input("Nome do paciente:")
+    lista_append(nome)
 
+    # pega a idade do paciente
+    idade = verifica_num(input("Idade do paciente:"), "Idade do paciente:",
+                         "A idade deve ser cadastrada em números inteiros (1, 10, 55, 80 etc...)")
+    lista_append(idade)
 
-#Função para verificar se a data do usuário está no formato válido
-def verificaData(data):
-    try:
-        datetime.strptime(data, '%d-%m-%Y')
-        return True
-    except ValueError:
-        return False
+    # pega a data de nascimento
+    while True:
+        data_nascimento = input("Data de nascimento do paciente DD-MM-YYYY:")
+        if verifica_data(data_nascimento):
+            break
+        else:
+            print("Data de nascimento inválida, deve ser preenchida neste formato: DD-MM-YYYY")
+    lista_append(data_nascimento)
 
+    # pega o endereço
+    endereco = input("Endereço do paciente:")
+    lista_append(endereco)
 
-#Função para verificar se o input do usuário é um número inteiro
-def verificaNum(var, msg, alerta):
-    while not var.isnumeric():
-        print(alerta)
-        var = input(msg)
-    var = int(var)
-    return var
-
-#Função para verificar se o input do usuário é uma opção válida cadastrada
-def verificaLista(var, lista, msg, alerta):
-    while var not in lista:
-        print(alerta)
-        var = input(msg)
-    return var
-
-#Função para verificar se a opção do usuário é sim ou nao
-def verificaOpcao(var, msg):
-    listaOpcao = ["sim", "nao"]
-    while var not in listaOpcao:
-        print(f"A resposta deve ser: {listaOpcao}")
-        var = input(msg)
-    if var == listaOpcao[0]:
-        return True
-    else:
-        return None
-
-def listaAppend(var, msg):
-    fichaPaciente.append(f"{Cor.CINZA}{msg}{Cor.RESET}{Cor.VERDE}{var}{Cor.RESET}")
-
-fichaPaciente = []
-
-nome = input("Nome do paciente:")
-listaAppend(nome, "nome do paciente:")
-
-idade = input("Idade do paciente:")
-idade = verificaNum(idade,"Idade do paciente",
-                    "A Idade deve ser cadastrada em números inteiros(1, 10, 55, 80 etc...)" )
-listaAppend(idade, "Idade do paciente:")
-
-
-while True:
-    dataNascimento = input("Data de nascimento do paciente DD-MM-YYYY:")
-
-    if verificaData(dataNascimento) == True:
-        break
-    else:
-        print("Data de nascimento inválida, deve ser preenchida neste formato: DD-MM-YYYY")
-listaAppend(dataNascimento, "Data de Nascimento:")
-
-endereco = input("Endereço do paciente:")
-listaAppend(endereco, "Endereço:")
-
-while True:
+    # pega o telefone
     telefone = input("Telefone para contato do paciente ex (dd) 92118-4570:")
+    telefone_formatado = verifica_telefone(telefone)
+    while telefone_formatado is None:
+        telefone = input("Telefone para contato do paciente (dd) 92118-4570:")
+        telefone_formatado = verifica_telefone(telefone)
+    lista_append(telefone_formatado)
 
-    if verificaTelefone(telefone) == True:
-        break
+    # Sexo do Paciente
+    lista_sexo = ["masculino", "feminino"]
+    sexo = escolher_opcao(input("Sexo do paciente:"), lista_sexo, "Sexo do paciente:",
+                          f"O sexo deve ser uma opção válida ex:{lista_sexo}")
+    lista_append(sexo)
+
+    # pega o tipo sanguíneo
+    imprimir_tabela_tipos_sanguineos()
+    lista_sangue = ["a-", "a+", "b+", "b-", "ab+", "ab-", "o+", "o-"]
+    tipo_sanguineo = escolher_opcao(input("Tipo Sanguíneo do paciente:"), lista_sangue,
+                                    "Tipo Sanguíneo do paciente:",
+                                    f"O tipo sanguíneo deve ser uma opção existente ex:{lista_sangue}")
+    lista_append(tipo_sanguineo)
+
+    # pergunta se o paciente tem alergia
+    opcao_alergia = input("O paciente tem alguma alergia?").strip().lower()
+    opcao_alergia = escolher_opcao(opcao_alergia[0], ["s", "n"], "O paciente tem alguma alergia?",
+                                   "Digite uma resposta válida!")
+    if opcao_alergia == "s":
+        alergia = input("Qual?")
     else:
-        print("Formato de telefone inválido!")
-listaAppend(telefone, "Telefone(cel):")
+        alergia = "vazio"
+    lista_append(alergia)
 
+    # pergunta se tem problema crônico
+    opcao_saude_cronico = input("O paciente tem algum problema de saúde crônico?").strip().lower()
+    opcao_saude_cronico = escolher_opcao(opcao_saude_cronico[0], ["s", "n"],"O paciente tem algum problema de saúde crônico?","Digite uma resposta válida!")
 
-listaSexo = ["masculino", "feminino"]
-
-sexo = input("Sexo do paciente:")
-sexo = verificaLista(sexo, listaSexo, "Sexo do paciente:",
-                     f"O sexo deve ser uma opção válida ex:{listaSexo}")
-listaAppend(sexo,"Sexo:")
-
-
-listaSangue = ["a-", "a+", "b+", "b-", "ab+", "ab-", "o+", "o-"]
-
-tipoSanguineo = input("Tipo Sanguíneo do paciente:")
-tipoSanguineo = verificaLista(tipoSanguineo, listaSangue, "Tipo Sanguíneo do paciente:",
-                              f"O tipo sanguíneo deve ser uma opção existente ex:{listaSangue}")
-listaAppend(tipoSanguineo, "Tipo Sanguíneo:")
-
-
-opcaoAlergia = input("O paciente tem alguma alergia?")
-opcaoAlergia = verificaOpcao(opcaoAlergia,"O paciente tem alguma alergia?")
-
-if opcaoAlergia is not None:
-    alergia = input("Qual?")
-    listaAppend(alergia, "Alergia:")
-
-
-opcaoSaudeCronico = input("O paciente tem algum problema de saúde crônico?")
-opcaoSaudeCronico = verificaOpcao(opcaoSaudeCronico,"O paciente tem algum problema de saúde crônico?")
-
-if opcaoSaudeCronico is not None:
-    saudeCronico = input("Qual?")
-    listaAppend(saudeCronico, "Problema de saúde crônico:")
-
-
-listaPrioritario = ["pcd", "idoso", "gestante"]
-
-opcaoPrioridade = input("O paciente é prioritário?")
-opcaoPrioridade = verificaOpcao(opcaoPrioridade, "O paciente é prioritário?")
-
-if opcaoPrioridade is not None:
-    prioritario = input(f"Qual das categorias:{listaPrioritario}")
-    prioritario = verificaLista(prioritario, listaPrioritario, f"Qual das categorias{listaPrioritario}:",
-                                f'A opção deve ser uma destas :{listaPrioritario}')
-    listaAppend(prioritario, "Atendimento priotitário:")
-
-
-listaExames = ["raio-x", "ultrassom", "tomografia", "ressonancia", "ecocardiograma"]
-
-exame = input(f"{listaExames} \n Exame que deseja realizar:")
-exame = verificaLista(exame, listaExames, f"{listaExames} \n Exame que deseja realizar:",
-                     "Escolha entre uma das opções apresentadas!")
-listaAppend(exame, "Pedido de Exame:")
-
-
-while True:
-    dataExame = input("Data para realização do exame DD-MM-YYYY:")
-
-    if verificaData(dataExame) == True:
-        print("Agendamento realizado com sucesso!")
-        break
+    if opcao_saude_cronico == "s":
+        saude_cronico = input("Qual?")
     else:
-        print("Data inválida, deve ser preenchido neste formado: DD-MM-YYYY (dia-mês-ano).")
-listaAppend(dataExame, "Data do Exame:")
+        saude_cronico = "vazio"
+    lista_append(saude_cronico)
 
+    # pergunta se é prioritário
+    lista_prioritario = ["pcd", "idoso", "gestante"]
+    opcao_prioridade = input("O paciente é prioritário?").strip().lower()
+    opcao_prioridade = escolher_opcao(opcao_prioridade[0], ["s", "n"],
+                                      "O paciente é prioritário?", "Digite uma resposta válida!")
+    if opcao_prioridade == "s":
+        prioritario = escolher_opcao(input(f"Qual das categorias ({', '.join(lista_prioritario)}): "),
+                                      lista_prioritario,
+                                      f"Qual das categorias ({', '.join(lista_prioritario)}):",
+                                      f'A opção deve ser uma destas: {", ".join(lista_prioritario)}')
+    else:
+        prioritario = "vazio"
+    lista_append(prioritario)
 
-print(f"{Cor.VERDE}Ficha completa do paciente{Cor.RESET}")
-for i in range(len(fichaPaciente)):
-    print(fichaPaciente[i])
+    # pergunta o exame que ele irá fazer
+    lista_exames = ["raio-x", "ultrassom", "tomografia", "ressonancia", "ecocardiograma"]
+    exame = escolher_opcao(input(f"Exame que deseja realizar ({', '.join(lista_exames)}): "), lista_exames,
+                            f"Exame que deseja realizar ({', '.join(lista_exames)}):",
+                            "Escolha entre uma das opções apresentadas!")
+    lista_append(exame)
 
+    # pergunta a data do exame
+    while True:
+        data_exame = input("Data para realização do exame DD-MM-YYYY:")
+        if verifica_data_futura(data_exame):
+            print("Agendamento realizado com sucesso!")
+            break
+        else:
+            print("Data inválida, deve ser preenchido neste formato: DD-MM-YYYY (dia-mês-ano).")
+    lista_append(data_exame)
 
-print(f"Muito Obrigado por utilizar os serviços da {Cor.ROSA}Healt{Cor.RESET}{Cor.AZUL}Connect{Cor.RESET}")
+    criar_tabela()  # Certifica-se de que a tabela existe no banco de dado
+    inserir_ficha_no_banco()  # Insere a ficha do paciente no banco de dados
+
+    imprimir_ficha_completa()
+    print(f"Muito Obrigado por utilizar os serviços da {Cor.ROSA}Healt{Cor.RESET}{Cor.AZUL}Connect{Cor.RESET}")
+
+if __name__ == "__main__":
+    main()
